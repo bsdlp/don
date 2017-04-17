@@ -28,10 +28,10 @@ const (
 	usage               = `don <profile-name>`
 	accessKeyIDName     = "aws_access_key_id"
 	secretAccessKeyName = "aws_secret_access_key"
-	outputFormat        = `# aws credentials environment variables for profile '%s'
-# retrieved from file '%s'
-export AWS_ACCESS_KEY_ID="%s"
-export AWS_SECRET_ACCESS_KEY="%s"`
+	outputFormat        = `# aws credentials environment variables for profile '%s';\n
+# retrieved from file '%s';\n
+export AWS_ACCESS_KEY_ID="%s";\n
+export AWS_SECRET_ACCESS_KEY="%s";`
 )
 
 func getCredentials(section *ini.Section) (id, secret string, err error) {
@@ -69,9 +69,9 @@ func getCredentialsFilePath() (filePath string, err error) {
 func main() {
 	flag.Parse()
 	args := flag.Args()
-	if len(args) == 2 {
-		profileName = args[1]
-	} else if len(args) > 2 {
+	if len(args) == 1 {
+		profileName = args[0]
+	} else if len(args) > 1 {
 		fmt.Fprintln(os.Stderr, usage)
 		os.Exit(1)
 	}
@@ -94,6 +94,7 @@ func main() {
 		fmt.Fprintln(os.Stderr, err.Error())
 		os.Exit(1)
 	}
+
 	if list {
 		for _, section := range credentialsFile.SectionStrings() {
 			// DEFAULT is implicit section without a section header
