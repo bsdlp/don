@@ -3,7 +3,6 @@ package main
 import (
 	"errors"
 	"fmt"
-	"io"
 	"os"
 	"os/user"
 	"path/filepath"
@@ -54,13 +53,13 @@ func main() {
 	if len(os.Args) == 2 {
 		profileName = os.Args[1]
 	} else if len(os.Args) > 2 {
-		io.WriteString(os.Stderr, usage)
+		fmt.Fprintln(os.Stderr, usage)
 		os.Exit(1)
 	}
 
 	currentUser, err := user.Current()
 	if err != nil {
-		io.WriteString(os.Stderr, err.Error())
+		fmt.Fprintln(os.Stderr, err.Error())
 		os.Exit(1)
 	}
 	homedir := currentUser.HomeDir
@@ -69,25 +68,25 @@ func main() {
 
 	fh, err := os.Open(filePath)
 	if err != nil {
-		io.WriteString(os.Stderr, err.Error())
+		fmt.Fprintln(os.Stderr, err.Error())
 		os.Exit(1)
 	}
 
 	credentialsFile, err := ini.Load(fh)
 	if err != nil {
-		io.WriteString(os.Stderr, err.Error())
+		fmt.Fprintln(os.Stderr, err.Error())
 		os.Exit(1)
 	}
 
 	section, err := credentialsFile.GetSection(profileName)
 	if err != nil {
-		io.WriteString(os.Stderr, ErrMissingProfile.Error())
+		fmt.Fprintln(os.Stderr, ErrMissingProfile.Error())
 		os.Exit(1)
 	}
 
 	id, secret, err := getCredentials(section)
 	if err != nil {
-		io.WriteString(os.Stderr, err.Error())
+		fmt.Fprintln(os.Stderr, err.Error())
 		os.Exit(1)
 	}
 
