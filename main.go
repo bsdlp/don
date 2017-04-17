@@ -28,9 +28,7 @@ const (
 	usage               = `don <profile-name>`
 	accessKeyIDName     = "aws_access_key_id"
 	secretAccessKeyName = "aws_secret_access_key"
-	outputFormat        = `# aws credentials environment variables for profile '%s';\n
-# retrieved from file '%s';\n
-export AWS_ACCESS_KEY_ID="%s";\n
+	outputFormat        = `export AWS_ACCESS_KEY_ID="%s";
 export AWS_SECRET_ACCESS_KEY="%s";`
 )
 
@@ -117,5 +115,5 @@ func main() {
 		os.Exit(1)
 	}
 
-	fmt.Fprintf(os.Stdout, outputFormat, profileName, filePath, id, secret)
+	fmt.Fprintf(os.Stdout, outputFormat, id, secret)
 }
