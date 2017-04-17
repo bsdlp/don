@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"flag"
 	"fmt"
 	"os"
 	"os/user"
@@ -11,6 +12,7 @@ import (
 )
 
 var (
+	list        bool
 	profileName = "default"
 	filePath    string
 )
@@ -49,22 +51,37 @@ func getCredentials(section *ini.Section) (id, secret string, err error) {
 	return
 }
 
-func main() {
-	if len(os.Args) == 2 {
-		profileName = os.Args[1]
-	} else if len(os.Args) > 2 {
-		fmt.Fprintln(os.Stderr, usage)
-		os.Exit(1)
-	}
+func init() {
+	flag.BoolVar(&list, "l", false, "list available aws profiles")
+}
 
+func getCredentialsFilePath() (filePath string, err error) {
 	currentUser, err := user.Current()
 	if err != nil {
-		fmt.Fprintln(os.Stderr, err.Error())
-		os.Exit(1)
+		return
 	}
 	homedir := currentUser.HomeDir
 
 	filePath = filepath.Join(homedir, ".aws/credentials")
+	return
+}
+
+func main() {
+	flag.Parse()
+	args := flag.Args()
+	if len(args) == 2 {
+		profileName = args[1]
+	} else if len(args) > 2 {
+		fmt.Fprintln(os.Stderr, usage)
+		os.Exit(1)
+	}
+
+	var err error
+	filePath, err = getCredentialsFilePath()
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err.Error())
+		os.Exit(1)
+	}
 
 	fh, err := os.Open(filePath)
 	if err != nil {
@@ -76,6 +93,15 @@ func main() {
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err.Error())
 		os.Exit(1)
+	}
+	if list {
+		for _, section := range credentialsFile.SectionStrings() {
+			// DEFAULT is implicit section without a section header
+			if section != "" && section != "DEFAULT" {
+				fmt.Fprintln(os.Stdout, section)
+			}
+		}
+		return
 	}
 
 	section, err := credentialsFile.GetSection(profileName)
